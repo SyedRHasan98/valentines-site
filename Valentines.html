@@ -1,0 +1,263 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Be My Valentine 💘</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, Helvetica, sans-serif;
+  background:#ffd6e7;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+
+/* FLOATING HEARTS */
+.hearts{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+}
+.heart{
+  position:absolute;
+  color:#ff6fa5;
+  opacity:.25;
+  animation:floatUp linear infinite;
+}
+@keyframes floatUp{
+  from{ transform:translateY(100vh); }
+  to{ transform:translateY(-10vh); }
+}
+
+.card{
+  background:white;
+  width:420px;
+  max-width:90%;
+  border-radius:22px;
+  padding:35px 25px 30px;
+  text-align:center;
+  box-shadow:0 20px 40px rgba(0,0,0,.15);
+  position:relative;
+  z-index:2;
+}
+
+.top-img{
+  width:270px;
+  height:270px;
+  object-fit:contain;
+  display:block;
+  margin:0 auto 10px;
+}
+
+/* SHIMMER NAME */
+.name{
+  background:linear-gradient(90deg,#000,#e91e63,#000);
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:shine 2.5s linear infinite;
+}
+@keyframes shine{
+  to{ background-position:200% center; }
+}
+
+h1{
+  font-size:26px;
+  margin:10px 0 20px;
+  font-weight:800;
+  color:black;
+}
+
+.buttons{
+  position:relative;
+  height:100px;
+}
+
+button{
+  border:none;
+  border-radius:14px;
+  padding:14px 22px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+
+#yesBtn{
+  background:#e91e63;
+  color:white;
+  font-size:18px;
+  padding:16px 30px;
+  box-shadow:0 8px 18px rgba(233,30,99,.35);
+}
+
+#noBtn{
+  background:#e5e5e5;
+  color:black;
+  position:absolute;
+  left:60%;
+  top:10px;
+}
+
+.sub{
+  margin-top:10px;
+  font-size:13px;
+  color:#666;
+}
+
+.shake{ animation:shake .4s; }
+@keyframes shake{
+  0%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  50%{transform:translateX(6px)}
+  75%{transform:translateX(-6px)}
+  100%{transform:translateX(0)}
+}
+
+#celebrate{
+  display:none;
+  margin-top:20px;
+  font-size:20px;
+  font-weight:800;
+  color:#e91e63;
+}
+
+#waBtn{
+  display:none;
+  margin-top:15px;
+  background:#25D366;
+  color:white;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="hearts" id="hearts"></div>
+
+<div class="card">
+
+  <img src="cat.jpeg" class="top-img">
+
+  <h1><span class="name">Sana</span> will you be my valentine?</h1>
+
+  <div class="buttons" id="btnArea">
+    <button id="yesBtn">Yes</button>
+    <button id="noBtn">No</button>
+  </div>
+
+  <div class="sub">“No” seems a bit shy 😳</div>
+
+  <div id="celebrate">She said YES!!! 💘🎉</div>
+
+  <button id="waBtn"
+    onclick="window.open('https://wa.me/971561428743?text=Yes%20I%20will%20be%20your%20Valentine%20💘','_blank')">
+    💬 Send Yes on WhatsApp
+  </button>
+
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+/* FLOATING HEARTS */
+const heartWrap = document.getElementById("hearts");
+for(let i=0;i<30;i++){
+  const h = document.createElement("div");
+  h.className="heart";
+  h.innerHTML="♥";
+  h.style.left=Math.random()*100+"%";
+  h.style.fontSize=(14+Math.random()*32)+"px";
+  h.style.animationDuration=(5+Math.random()*6)+"s";
+  heartWrap.appendChild(h);
+}
+
+/* BUTTON LOGIC */
+const noBtn = document.getElementById("noBtn");
+const yesBtn = document.getElementById("yesBtn");
+const area = document.getElementById("btnArea");
+const celebrate = document.getElementById("celebrate");
+const waBtn = document.getElementById("waBtn");
+
+let yesScale = 1;
+
+/* NO RUNS AWAY + YES GROWS */
+function moveNo(){
+  const w = area.clientWidth - noBtn.offsetWidth;
+  const h = area.clientHeight - noBtn.offsetHeight;
+
+  noBtn.style.left = Math.random()*w+"px";
+  noBtn.style.top = Math.random()*h+"px";
+
+  yesScale += 0.08;
+  yesBtn.style.transform = `scale(${yesScale})`;
+}
+
+noBtn.addEventListener("mouseenter", moveNo);
+noBtn.addEventListener("mousemove", moveNo);
+noBtn.addEventListener("touchstart", moveNo);
+
+/* NO CLICK SHAKE */
+noBtn.addEventListener("click", ()=>{
+  noBtn.classList.add("shake");
+  if(navigator.vibrate) navigator.vibrate(300);
+  setTimeout(()=>noBtn.classList.remove("shake"),400);
+});
+
+/* YES CLICK */
+yesBtn.addEventListener("click", ()=>{
+  celebrate.style.display="block";
+  waBtn.style.display="inline-block";
+  startConfetti();
+});
+
+/* GOLD SHIMMER CONFETTI */
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let pieces = [];
+
+function startConfetti(){
+  pieces = Array.from({length:160},()=>( {
+    x:Math.random()*canvas.width,
+    y:-20,
+    r:4+Math.random()*4,
+    vy:2+Math.random()*3
+  }));
+  animate();
+}
+
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  pieces.forEach(p=>{
+    p.y += p.vy;
+    const glow = 180 + Math.floor(Math.random()*75);
+    ctx.fillStyle = `rgb(${glow}, ${glow-40}, 40)`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255,255,220,0.6)";
+    ctx.fillRect(p.x, p.y, 2, 2);
+  });
+
+  if(pieces.some(p=>p.y < canvas.height)){
+    requestAnimationFrame(animate);
+  }
+}
+</script>
+
+</body>
+</html>
